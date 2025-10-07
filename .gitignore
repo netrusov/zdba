@@ -1,0 +1,20 @@
+# ignore everything
+*
+# but directories
+!*/
+
+!/bin/**
+!/examples/**
+!/lib/**
+!/schemas/**
+
+!/.gitignore
+!/.rubocop.yml
+!/Gemfile
+!/Gemfile.lock
+!/LICENSE
+!/mise.toml
+!/README.md
+!/zdba.gemspec
+
+/tmp/

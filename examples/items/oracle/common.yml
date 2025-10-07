@@ -1,0 +1,456 @@
+# yaml-language-server: $schema=../../schemas/config.json#/$defs/items
+- name: archivelog_switch
+  query: |
+    select count(*)
+    from gv$log_history
+    where first_time >= (sysdate - 1 / 24)
+
+- name: uptime
+  query: |
+    select to_char ( (sysdate - startup_time) * 86400, 'FM99999999999999990')
+    from gv$instance
+
+- name: dbblockgets
+  query: |
+    select sum (value)
+    from gv$sysstat
+    where name = 'db block gets'
+
+- name: dbblockchanges
+  query: |
+    select sum (value)
+    from gv$sysstat
+    where name = 'db block changes'
+
+- name: dbconsistentgets
+  query: |
+    select sum (value)
+    from gv$sysstat
+    where name = 'consistent gets'
+
+- name: dbphysicalreads
+  query: |
+    select sum (value)
+    from gv$sysstat
+    where name = 'physical reads'
+
+- name: dbhitratio
+  query: |
+    select ( sum (case name when 'consistent gets' then value else 0 end)
+    + sum (case name when 'db block gets' then value else 0 end)
+    - sum (case name when 'physical reads' then value else 0 end))
+    / ( sum (case name when 'consistent gets' then value else 0 end)
+    + sum (case name when 'db block gets' then value else 0 end))
+    * 100
+    from gv$sysstat
+
+- name: hitratio_body
+  query: |
+    select gethitratio * 100
+    from gv$librarycache
+    where namespace = 'BODY'
+
+- name: hitratio_sqlarea
+  query: |
+    select gethitratio * 100
+    from gv$librarycache
+    where namespace = 'SQL AREA'
+
+- name: hitratio_trigger
+  query: |
+    select gethitratio * 100
+    from gv$librarycache
+    where namespace = 'TRIGGER'
+
+- name: hitratio_table_proc
+  query: |
+    select gethitratio * 100
+    from gv$librarycache
+    where namespace = 'TABLE/PROCEDURE'
+
+- name: miss_latch
+  query: |
+    select sum (misses) from gv$latch
+
+- name: pga_aggregate_target
+  query: |
+    select value
+    from gv$pgastat
+    where name = 'aggregate PGA target parameter'
+
+- name: pga
+  query: |
+    select value
+    from gv$pgastat
+    where name = 'total PGA inuse'
+
+- name: phio_datafile_reads
+  query: |
+    select sum (value)
+    from gv$sysstat
+    where name = 'physical reads direct'
+
+- name: phio_datafile_writes
+  query: |
+    select sum (value)
+    from gv$sysstat
+    where name = 'physical writes direct'
+
+- name: phio_redo_writes
+  query: |
+    select sum (value)
+    from gv$sysstat
+    where name = 'redo writes'
+
+- name: pinhitratio_body
+  query: |
+    select pins / (pins + reloads) * 100
+    from gv$librarycache
+    where namespace = 'BODY'
+
+- name: pinhitratio_sqlarea
+  query: |
+    select pins / (pins + reloads) * 100
+    from gv$librarycache
+    where namespace = 'SQL AREA'
+
+- name: pinhitratio_trigger
+  query: |
+    select pins / (pins + reloads) * 100
+    from gv$librarycache
+    where namespace = 'TRIGGER'
+
+- name: pinhitratio_table_proc
+  query: |
+    select pins / (pins + reloads) * 100
+    from gv$librarycache
+    where namespace = 'TABLE/PROCEDURE'
+
+- name: pool_dict_cache
+  default: 0
+  query: |
+    select bytes
+    from gv$sgastat
+    where pool = 'shared pool' and name = 'dictionary cache'
+
+- name: pool_free_mem
+  query: |
+    select bytes
+    from gv$sgastat
+    where pool = 'shared pool' and name = 'free memory'
+
+- name: pool_lib_cache
+  default: 0
+  query: |
+    select bytes
+    from gv$sgastat
+    where pool = 'shared pool' and name = 'library cache'
+
+- name: pool_sql_area
+  default: 0
+  query: |
+    select bytes
+    from gv$sgastat
+    where pool = 'shared pool' and name = 'sql area'
+
+- name: pool_misc
+  query: |
+    select sum (bytes)
+    from gv$sgastat
+    where pool = 'shared pool'
+    and name not in ('library cache'
+    , 'dictionary cache'
+    , 'free memory'
+    , 'sql area')
+
+- name: maxprocs
+  query: |
+    select value from gv$parameter where name = 'processes'
+
+- name: procnum
+  query: |
+    select count (*) from gv$process
+
+- name: maxsession
+  query: |
+    select value from gv$parameter where name = 'sessions'
+
+- name: session
+  query: |
+    select count (*) from gv$session
+
+- name: session_system
+  query: |
+    select count (*)
+    from gv$session
+    where type = 'BACKGROUND'
+
+- name: session_active
+  query: |
+    select count (*)
+    from gv$session
+    where type != 'BACKGROUND' and status = 'ACTIVE'
+
+- name: session_inactive
+  query: |
+    select count (*)
+    from gv$session
+    where type != 'BACKGROUND' and status = 'INACTIVE'
+
+- name: sga_buffer_cache
+  query: |
+    select sum (bytes)
+    from gv$sgastat
+    where name in ('db_block_buffers', 'buffer_cache')
+
+- name: sga_fixed
+  query: |
+    select sum (bytes)
+    from gv$sgastat
+    where name = 'fixed_sga'
+
+- name: sga_java_pool
+  query: |
+    select sum (bytes)
+    from gv$sgastat
+    where pool = 'java pool'
+
+- name: sga_large_pool
+  query: |
+    select sum (bytes)
+    from gv$sgastat
+    where pool = 'large pool'
+
+- name: sga_shared_pool
+  query: |
+    select sum (bytes)
+    from gv$sgastat
+    where pool = 'shared pool'
+
+- name: sga_log_buffer
+  query: |
+    select sum (bytes)
+    from gv$sgastat
+    where name = 'log_buffer'
+
+- name: waits_directpath_read
+  query: |
+    select total_waits
+    from gv$system_event
+    where event = 'direct path read'
+
+- name: waits_file_io
+  query: |
+    select nvl (sum (total_waits), 0)
+    from gv$system_event
+    where event in ('file identify', 'file open')
+
+- name: waits_controlfileio
+  query: |
+    select sum (total_waits)
+    from gv$system_event
+    where event in ('control file sequential read'
+    , 'control file single write'
+    , 'control file parallel write')
+
+- name: waits_logwrite
+  query: |
+    select sum (total_waits)
+    from gv$system_event
+    where event in ('log file single write', 'log file parallel write')
+
+- name: waits_logsync
+  query: |
+    select sum(total_waits)
+    from gv$system_event
+    where event = 'log file sync'
+
+- name: waits_multiblock_read
+  query: |
+    select sum (total_waits)
+    from gv$system_event
+    where event = 'db file scattered read'
+
+- name: waits_singleblock_read
+  query: |
+    select sum (total_waits)
+    from gv$system_event
+    where event = 'db file sequential read'
+
+- name: waits_sqlnet
+  query: |
+    select sum (total_waits)
+    from gv$system_event
+    where event in ('SQL*Net message to client'
+    , 'SQL*Net message to dblink'
+    , 'SQL*Net more data to client'
+    , 'SQL*Net more data to dblink'
+    , 'SQL*Net break/reset to client'
+    , 'SQL*Net break/reset to dblink')
+
+- name: dbversion
+  query: |
+    select banner
+    from gv$version
+    where banner like '%Oracle Database%'
+
+- name: blocking_sessions
+  default: 0
+  query: |
+    select count(*)
+    from (
+      select rootid
+      from (
+            select level lvl
+                  , connect_by_root (inst_id || '.' || sid) rootid
+                  , seconds_in_wait
+              from gv$session
+        start with blocking_session is null
+        connect by nocycle prior inst_id = blocking_instance
+                        and prior sid = blocking_session
+      )
+      where lvl > 1
+      group by rootid
+        having sum(seconds_in_wait) > 300
+    )
+
+- name: blocking_sessions_full
+  query: |
+    select listagg(lpad(' ', (level - 1) * 4)
+           || 'INST_ID         :  '
+           || inst_id
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'SERVICE_NAME    :  '
+           || service_name
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'SID,SERIAL      :  '
+           || sid
+           || ','
+           || serial#
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'USERNAME        :  '
+           || username
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'OSUSER          :  '
+           || osuser
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'MACHINE         :  '
+           || machine
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'PROGRAM         :  '
+           || program
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'MODULE          :  '
+           || module
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'SQL_ID          :  '
+           || sql_id
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'EVENT           :  '
+           || event
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'SECONDS_IN_WAIT :  '
+           || seconds_in_wait
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'STATE           :  '
+           || state
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || 'STATUS          :  '
+           || status
+           || chr(10)
+           || lpad(' ', (level - 1) * 4)
+           || '========================='
+           , chr(10)) within group (order by level) as blocking_sess_info
+      from (
+                  select inst_id || '.' || sid id
+                       , case
+                            when blocking_instance is not null
+                            then
+                               blocking_instance || '.' || blocking_session
+                         end
+                            parent_id
+                       , inst_id
+                       , service_name
+                       , sid
+                       , serial#
+                       , username
+                       , osuser
+                       , machine
+                       , program
+                       , module
+                       , sql_id
+                       , event
+                       , seconds_in_wait
+                       , state
+                       , status
+                       , level lvl
+                       , connect_by_isleaf isleaf
+                       , connect_by_root (inst_id || '.' || sid) rootid
+                    from gv$session
+              start with blocking_session is null
+              connect by nocycle prior inst_id = blocking_instance
+                             and prior sid = blocking_session
+           )
+     where lvl || isleaf <> '11'
+       and rootid in
+              (
+                   select rootid
+                     from (
+                                 select level lvl
+                                      , connect_by_root (inst_id || '.' || sid) rootid
+                                      , seconds_in_wait
+                                   from gv$session
+                             start with blocking_session is null
+                             connect by nocycle prior inst_id = blocking_instance
+                                            and prior sid = blocking_session
+                          )
+                    where lvl > 1
+                 group by rootid
+                   having sum(seconds_in_wait) > 300
+              )
+    connect by nocycle prior id = parent_id
+    start with parent_id is null
+
+- name: tablespaces.discovery
+  type: discovery_rule
+  query: |
+    select name from gv$tablespace
+
+- name: tablespaces.usage_pct
+  type: discovery_item
+  query: |
+    select tablespace_name, round(used_percent, 5)
+    from dba_tablespace_usage_metrics
+
+- name: tablespaces.usage_bytes
+  type: discovery_item
+  query: |
+    select ta.tablespace_name, ta.used_space * tb.block_size
+    from dba_tablespace_usage_metrics ta
+    join dba_tablespaces tb on ta.tablespace_name = tb.tablespace_name
+
+- name: wait_classes.discovery
+  type: discovery_rule
+  query: |
+    select distinct wait_class
+    from gv$system_event
+
+- name: wait_classes.waits_ms
+  type: discovery_item
+  query: |
+    select ta.wait_class, sum(ta.total_waits)
+    from gv$system_event ta
+    where event not in ('SQL*Net message from client', 'pipe get')
+    group by ta.wait_class

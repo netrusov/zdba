@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../../schemas/config.json#/$defs/items
+- name: uptime
+  query: |
+    SELECT date_part('epoch', now() - pg_postmaster_start_time())
+
+- name: tablespaces.discovery
+  type: discovery_rule
+  query: |
+    SELECT spcname FROM pg_tablespace
+
+- name: tablespaces.usage_bytes
+  type: discovery_item
+  query: |
+    SELECT spcname, pg_tablespace_size(spcname)
+    FROM pg_tablespace

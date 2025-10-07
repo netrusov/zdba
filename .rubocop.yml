@@ -1,0 +1,12 @@
+AllCops:
+  TargetRubyVersion: 3.4
+  SuggestExtensions: false
+  NewCops: enable
+  Exclude:
+    - "tmp/**/*"
+
+Metrics:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false

@@ -1,0 +1,3 @@
+- name: archivelog_seq
+  query: |
+    select max (sequence#) from v$log_history

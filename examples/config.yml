@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=schemas/config.json
+logger:
+  level: info
+
+sender:
+  url: "https://127.0.0.1:10051"
+  connect_timeout: 10
+  batch_size: 100
+  threads: 1
+
+global:
+  poll_interval: 30
+
+# databases:
+#   - name: XXX
+#     connection:
+#       database: "postgresql://..."
+#       username: "..."
+#       password: "..."
+#     include:
+#       - items/postgres/common.yml
+#     # items can be specified right inside the database definition
+#     items:
+#       - name: my_metric
+#         query: |
+#           SELECT col FROM my_table
+#   - name: ZZZ
+#     connection:
+#       database: "oracle://..."
+#       username: "..."
+#       password: "..."
+#     include:
+#       - items/oracle/common.yml
+#       - items/oracle/primary.yml
+#   - name: ZZZR
+#     connection:
+#       database: "oracle://..."
+#       username: "..."
+#       password: "..."
+#     include:
+#       - items/oracle/common.yml
+#       - items/oracle/standby.yml

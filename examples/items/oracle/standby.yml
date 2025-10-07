@@ -1,0 +1,5 @@
+- name: archivelog_applied
+  query: |
+    select max (sequence#)
+    from v$archived_log
+    where applied = 'YES'

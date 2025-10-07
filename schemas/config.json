@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "ZDBA Configuration Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sender",
+    "databases"
+  ],
+  "properties": {
+    "global": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "poll_interval": {
+          "$ref": "#/$defs/positive_integer"
+        }
+      }
+    },
+    "logger": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "fatal",
+            "error",
+            "warn",
+            "info",
+            "debug"
+          ]
+        },
+        "json": {
+          "type": "boolean"
+        }
+      }
+    },
+    "sender": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "connect_timeout": {
+          "$ref": "#/$defs/positive_integer"
+        },
+        "batch_size": {
+          "$ref": "#/$defs/positive_integer"
+        },
+        "threads": {
+          "$ref": "#/$defs/positive_integer"
+        }
+      }
+    },
+    "databases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/database"
+      }
+    },
+    "require": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/filled_string"
+      }
+    }
+  },
+  "$defs": {
+    "positive_integer": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "filled_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "connection"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/filled_string"
+        },
+        "poll_interval": {
+          "$ref": "#/$defs/positive_integer"
+        },
+        "connection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "database"
+          ],
+          "properties": {
+            "database": {
+              "$ref": "#/$defs/filled_string"
+            },
+            "username": {
+              "$ref": "#/$defs/filled_string"
+            },
+            "password": {
+              "$ref": "#/$defs/filled_string"
+            },
+            "jdbc_properties": {
+              "type": "object"
+            }
+          }
+        },
+        "items": {
+          "$ref": "#/$defs/items"
+        },
+        "include": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/filled_string"
+          }
+        }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "query"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "basic",
+            "discovery_rule",
+            "discovery_item"
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/filled_string"
+        },
+        "query": {
+          "$ref": "#/$defs/filled_string"
+        },
+        "poll_interval": {
+          "$ref": "#/$defs/positive_integer"
+        },
+        "default": {
+          "description": "valid for basic item only",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  }
+}
