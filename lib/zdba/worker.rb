@@ -73,9 +73,8 @@ module ZDBA
 
     def process_discovery_rule(item)
       throttle(**item) do
+        key = format(DISCOVERY_RULE_KEY_FORMAT, item[:name]).upcase
         discovered = @connection.fetch_many(item[:query]).map do |(value)|
-          key = format(DISCOVERY_RULE_KEY_FORMAT, item[:name]).upcase
-
           { key => value }
         end
 
