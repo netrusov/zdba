@@ -9,15 +9,15 @@ module ZDBA
       @config = config
       @queue = queue
       @checker = checker
+
+      @logger = ::ZDBA.logger
     end
 
     def run
-      ::ZDBA.logger.info { "sender[#{@name}]: starting" }
+      @logger.info { 'starting' }
 
       while @checker.call || !@queue.empty?
-        unless @checker.call
-          ::ZDBA.logger.info { "sender[#{@name}] (stopping): queue still contains #{@queue.size} message(s)" }
-        end
+        @logger.info { "(stopping): queue still contains #{@queue.size} message(s)" } unless @checker.call
 
         data = []
 
@@ -28,14 +28,14 @@ module ZDBA
         end
 
         unless data.empty?
-          ::ZDBA.logger.debug { data.inspect }
+          @logger.debug { data.inspect }
           # send_data(data)
         end
 
         sleep(1)
       end
 
-      ::ZDBA.logger.info { "sender[#{@name}]: shutdown" }
+      @logger.info { 'shutdown' }
     end
 
     private
@@ -59,10 +59,10 @@ module ZDBA
           response_length = response_header.byteslice(5, 8).unpack1('Q<')
           response_body = sock.read(response_length)
 
-          ::ZDBA.logger.debug { "sender[#{@name}]: response #{response_body}" }
+          @logger.debug { "response #{response_body}" }
         end
       rescue ::StandardError => e
-        ::ZDBA.logger.error { "sender[#{@name}]: failed to send data: #{e.message}" }
+        @logger.error { "failed to send data: #{e.message}" }
       end
     end
 
@@ -80,11 +80,11 @@ module ZDBA
         attempts += 1
 
         if attempts > max_retries
-          ::ZDBA.logger.error { "sender[#{@name}]: giving up after #{attempts} attempts: #{e.message}" }
+          @logger.error { "giving up after #{attempts} attempts: #{e.message}" }
           false
         else
           delay = [base_delay * (2**(attempts - 1)), max_delay].min
-          ::ZDBA.logger.warn { "sender[#{@name}]: retrying in #{delay}s (attempt #{attempts}) - #{e.message}" }
+          @logger.warn { "retrying in #{delay}s (attempt #{attempts}) - #{e.message}" }
           sleep(delay)
           retry
         end

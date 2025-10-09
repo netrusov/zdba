@@ -13,10 +13,11 @@ module ZDBA
       @last_polls = {}
 
       @connection = ::ZDBA::Connection.new(@config[:connection])
+      @logger = ::ZDBA.logger
     end
 
     def run
-      ::ZDBA.logger.info { "worker[#{@name}]: starting" }
+      @logger.info { 'starting' }
 
       while @checker.call
         collect_metrics
@@ -24,7 +25,7 @@ module ZDBA
         sleep(1)
       end
 
-      ::ZDBA.logger.info { "worker[#{@name}]: shutdown" }
+      @logger.info { 'shutdown' }
     ensure
       @connection.disconnect
     end
@@ -42,17 +43,17 @@ module ZDBA
           process_basic_item(item)
         end
       rescue ::ZDBA::InvalidQueryError => e
-        ::ZDBA.logger.error do
-          "worker[#{@name}]: failed to execute query `#{item[:name]}`: #{e.message} #{e.backtrace[0]}"
+        @logger.error do
+          "failed to execute query `#{item[:name]}`: #{e.message} #{e.backtrace[0]}"
         end
       end
 
       send_liveness_check(1)
     rescue ::ZDBA::DatabaseConnectionError => e
-      ::ZDBA.logger.error { "worker[#{@name}]: database is down" }
+      @logger.error { 'database is down' }
       send_liveness_check(0)
     rescue ::StandardError => e
-      ::ZDBA.logger.error { [e.inspect, e.backtrace[0]] }
+      @logger.error { [e.inspect, e.backtrace[0]] }
       send_liveness_check(0)
     end
 

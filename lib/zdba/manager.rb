@@ -6,10 +6,12 @@ module ZDBA
 
     def initialize(config)
       @config = config
+
+      @logger = ::ZDBA.logger
     end
 
     def run
-      ::ZDBA.logger.info { format('starting ZDBA v%s', ::ZDBA::VERSION) }
+      @logger.info { format('starting ZDBA v%s', ::ZDBA::VERSION) }
 
       running = true
       queue = ::Thread::Queue.new
@@ -47,12 +49,12 @@ module ZDBA
 
       sleep(1) while running
 
-      ::ZDBA.logger.info { 'stopping' }
+      @logger.info { 'stopping' }
 
       (worker_threads + sender_threads).each do |thread|
         next if thread.join(::ZDBA::Manager::JOIN_TIMEOUT)
 
-        ::ZDBA.logger.warn { "thread '#{thread.name}' did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s" }
+        @logger.warn { "thread '#{thread.name}' did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s" }
       end
     end
   end
