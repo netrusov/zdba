@@ -13,36 +13,39 @@ module ZDBA
     def run
       @logger.info { format('starting ZDBA v%s', ::ZDBA::VERSION) }
 
-      running = true
       queue = ::Thread::Queue.new
+      running = true
+      running_checker = -> { running }
 
       ::Signal.trap('INT')  { running = false }
       ::Signal.trap('TERM') { running = false }
 
-      checker = -> { running }
-
-      worker_threads = @config[:databases].map do |worker_config|
+      worker_threads = @config[:databases].map do |config|
         ::Thread.new do
-          ::Thread.current.name = "worker-#{worker_config[:name]}"
+          name = "worker-#{config[:name]}"
+
+          ::Thread.current.name = name
 
           ::ZDBA::Worker.new(
-            name: worker_config[:name],
-            config: worker_config,
+            name:,
+            config:,
             queue:,
-            checker:
+            running_checker:
           ).run
         end
       end
 
       sender_threads = ::Array.new(@config[:sender][:threads]) do |i|
         ::Thread.new do
-          ::Thread.current.name = "sender-#{i}"
+          name = "sender-#{i}"
+
+          ::Thread.current.name = name
 
           ::ZDBA::Sender.new(
-            name: i,
+            name:,
             config: @config[:sender],
             queue:,
-            checker:
+            running_checker:
           ).run
         end
       end

@@ -5,13 +5,13 @@ module ZDBA
     DISCOVERY_RULE_KEY_FORMAT = '{#%s}'
     DISCOVERY_ITEM_KEY_FORMAT = '%s[%s]'
 
-    def initialize(name:, config:, queue:, checker:)
+    def initialize(name:, config:, queue:, running_checker:)
       @name = name
       @config = config
       @queue = queue
-      @checker = checker
-      @last_polls = {}
+      @running_checker = running_checker
 
+      @last_polls = {}
       @connection = ::ZDBA::Connection.new(@config[:connection])
       @logger = ::ZDBA.logger
     end
@@ -19,7 +19,7 @@ module ZDBA
     def run
       @logger.info { 'starting' }
 
-      while @checker.call
+      while @running_checker.call
         collect_metrics
 
         sleep(1)

@@ -4,20 +4,21 @@ module ZDBA
   class Sender
     ZABBIX_HEADER = "ZBXD\x01"
 
-    def initialize(name:, config:, queue:, checker:)
+    def initialize(name:, config:, queue:, running_checker:)
       @name = name
       @config = config
       @queue = queue
-      @checker = checker
+      @running_checker = running_checker
 
+      @zabbix_uri = ::URI.parse(@config[:url])
       @logger = ::ZDBA.logger
     end
 
     def run
       @logger.info { 'starting' }
 
-      while @checker.call || !@queue.empty?
-        @logger.info { "(stopping): queue still contains #{@queue.size} message(s)" } unless @checker.call
+      while @running_checker.call || !@queue.empty?
+        @logger.info { "(stopping): queue still contains #{@queue.size} message(s)" } unless @running_checker.call
 
         data = []
 
@@ -45,10 +46,8 @@ module ZDBA
       header = ::ZDBA::Sender::ZABBIX_HEADER + [payload.bytesize].pack('Q<')
       message = header + payload
 
-      uri = ::URI.parse(@config[:url])
-
       begin
-        ::Socket.tcp(uri.host, uri.port, connect_timeout: @config[:connect_timeout]) do |sock|
+        ::Socket.tcp(@zabbix_uri.host, @zabbix_uri.port, connect_timeout: @config[:connect_timeout]) do |sock|
           sock.write(message)
 
           response_header = sock.read(13)
