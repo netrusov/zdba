@@ -12,55 +12,57 @@ module ZDBA
     end
 
     def run
-      ZDBA.logger.info { "sender[#{@name}]: starting" }
+      ::ZDBA.logger.info { "sender[#{@name}]: starting" }
 
       while @checker.call || !@queue.empty?
         unless @checker.call
-          ZDBA.logger.info { "sender[#{@name}] (stopping): queue still contains #{@queue.size} message(s)" }
+          ::ZDBA.logger.info { "sender[#{@name}] (stopping): queue still contains #{@queue.size} message(s)" }
         end
 
         data = []
 
         @config[:batch_size].times do
           data << @queue.pop(true)
-        rescue ThreadError
+        rescue ::ThreadError
           break
         end
 
         unless data.empty?
-          ZDBA.logger.debug { data.inspect }
+          ::ZDBA.logger.debug { data.inspect }
           # send_data(data)
         end
 
         sleep(1)
       end
 
-      ZDBA.logger.info { "sender[#{@name}]: shutdown" }
+      ::ZDBA.logger.info { "sender[#{@name}]: shutdown" }
     end
 
     private
 
     def send_data(data)
-      payload = JSON.dump({ request: 'sender data', data: })
-      header = ZABBIX_HEADER + [payload.bytesize].pack('Q<')
+      payload = ::JSON.dump({ request: 'sender data', data: })
+      header = ::ZDBA::Sender::ZABBIX_HEADER + [payload.bytesize].pack('Q<')
       message = header + payload
 
-      uri = URI.parse(@config[:url])
+      uri = ::URI.parse(@config[:url])
 
       begin
-        Socket.tcp(uri.host, uri.port, connect_timeout: @config[:connect_timeout]) do |sock|
+        ::Socket.tcp(uri.host, uri.port, connect_timeout: @config[:connect_timeout]) do |sock|
           sock.write(message)
 
           response_header = sock.read(13)
-          raise "Invalid response header: #{response_header.inspect}" unless response_header&.start_with?(ZABBIX_HEADER)
+          unless response_header&.start_with?(::ZDBA::Sender::ZABBIX_HEADER)
+            raise("Invalid response header: #{response_header.inspect}")
+          end
 
           response_length = response_header.byteslice(5, 8).unpack1('Q<')
           response_body = sock.read(response_length)
 
-          ZDBA.logger.debug { "sender[#{@name}]: response #{response_body}" }
+          ::ZDBA.logger.debug { "sender[#{@name}]: response #{response_body}" }
         end
-      rescue StandardError => e
-        ZDBA.logger.error { "sender[#{@name}]: failed to send data: #{e.message}" }
+      rescue ::StandardError => e
+        ::ZDBA.logger.error { "sender[#{@name}]: failed to send data: #{e.message}" }
       end
     end
 
@@ -74,15 +76,15 @@ module ZDBA
       begin
         send_data(data)
         true
-      rescue StandardError => e
+      rescue ::StandardError => e
         attempts += 1
 
         if attempts > max_retries
-          ZDBA.logger.error { "sender[#{@name}]: giving up after #{attempts} attempts: #{e.message}" }
+          ::ZDBA.logger.error { "sender[#{@name}]: giving up after #{attempts} attempts: #{e.message}" }
           false
         else
           delay = [base_delay * (2**(attempts - 1)), max_delay].min
-          ZDBA.logger.warn { "sender[#{@name}]: retrying in #{delay}s (attempt #{attempts}) - #{e.message}" }
+          ::ZDBA.logger.warn { "sender[#{@name}]: retrying in #{delay}s (attempt #{attempts}) - #{e.message}" }
           sleep(delay)
           retry
         end

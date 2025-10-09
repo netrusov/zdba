@@ -12,11 +12,11 @@ module ZDBA
       @checker = checker
       @last_polls = {}
 
-      @connection = ZDBA::Connection.new(@config[:connection])
+      @connection = ::ZDBA::Connection.new(@config[:connection])
     end
 
     def run
-      ZDBA.logger.info { "worker[#{@name}]: starting" }
+      ::ZDBA.logger.info { "worker[#{@name}]: starting" }
 
       while @checker.call
         collect_metrics
@@ -24,7 +24,7 @@ module ZDBA
         sleep(1)
       end
 
-      ZDBA.logger.info { "worker[#{@name}]: shutdown" }
+      ::ZDBA.logger.info { "worker[#{@name}]: shutdown" }
     ensure
       @connection.disconnect
     end
@@ -41,18 +41,18 @@ module ZDBA
         else
           process_basic_item(item)
         end
-      rescue ZDBA::InvalidQueryError => e
-        ZDBA.logger.error do
+      rescue ::ZDBA::InvalidQueryError => e
+        ::ZDBA.logger.error do
           "worker[#{@name}]: failed to execute query `#{item[:name]}`: #{e.message} #{e.backtrace[0]}"
         end
       end
 
       send_liveness_check(1)
-    rescue ZDBA::DatabaseConnectionError => e
-      ZDBA.logger.error { "worker[#{@name}]: database is down" }
+    rescue ::ZDBA::DatabaseConnectionError => e
+      ::ZDBA.logger.error { "worker[#{@name}]: database is down" }
       send_liveness_check(0)
-    rescue StandardError => e
-      ZDBA.logger.error { [e.inspect, e.backtrace[0]] }
+    rescue ::StandardError => e
+      ::ZDBA.logger.error { [e.inspect, e.backtrace[0]] }
       send_liveness_check(0)
     end
 
@@ -73,7 +73,7 @@ module ZDBA
 
     def process_discovery_rule(item)
       throttle(**item) do
-        key = format(DISCOVERY_RULE_KEY_FORMAT, item[:name]).upcase
+        key = format(::ZDBA::Worker::DISCOVERY_RULE_KEY_FORMAT, item[:name]).upcase
         discovered = @connection.fetch_many(item[:query]).map do |(value)|
           { key => value }
         end
@@ -85,7 +85,7 @@ module ZDBA
     def process_discovery_item(item)
       throttle(**item) do
         @connection.fetch_many(item[:query]) do |(key, value)|
-          key = format(DISCOVERY_ITEM_KEY_FORMAT, item[:name], key)
+          key = format(::ZDBA::Worker::DISCOVERY_ITEM_KEY_FORMAT, item[:name], key)
 
           publish(key, value)
         end
@@ -95,17 +95,17 @@ module ZDBA
     def throttle(name:, poll_interval:, **)
       last_poll = @last_polls[name]
 
-      return if last_poll && (poll_interval > ZDBA.current_time - last_poll)
+      return if last_poll && (poll_interval > ::ZDBA.current_time - last_poll)
 
-      @last_polls[name] = ZDBA.current_time
+      @last_polls[name] = ::ZDBA.current_time
 
       yield
     end
 
     def publish(key, value)
-      value = JSON.dump(value) unless value.is_a?(String)
+      value = ::JSON.dump(value) unless value.is_a?(::String)
 
-      @queue.push({ host: @name, key:, value:, clock: ZDBA.current_time })
+      @queue.push({ host: @name, key:, value:, clock: ::ZDBA.current_time })
     end
   end
 end

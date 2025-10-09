@@ -5,8 +5,18 @@ AllCops:
   Exclude:
     - "tmp/**/*"
 
+Lint/ConstantResolution:
+  Enabled: true
+
 Metrics:
   Enabled: false
 
+Style/ClassAndModuleChildren:
+  Enabled: true
+  EnforcedStyle: nested
+
 Style/Documentation:
   Enabled: false
+
+Style/MethodCallWithArgsParentheses:
+  Enabled: true

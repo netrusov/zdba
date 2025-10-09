@@ -7,7 +7,7 @@ module ZDBA
     end
 
     def connection
-      @connection ||= Sequel.jdbc(@config)
+      @connection ||= ::Sequel.jdbc(@config)
     end
 
     def disconnect
@@ -37,7 +37,7 @@ module ZDBA
         meta = rs.meta_data
 
         while rs.next
-          row = Array.new(meta.column_count) do |i|
+          row = ::Array.new(meta.column_count) do |i|
             # { name: meta.get_column_label(i + 1), value: rs.get_object(i + 1) }
             rs.get_object(i + 1)
           end
@@ -47,10 +47,10 @@ module ZDBA
       ensure
         rs.close
       end
-    rescue Sequel::DatabaseConnectionError => e
-      raise ZDBA::DatabaseConnectionError, e.message
-    rescue Sequel::DatabaseError => e
-      raise ZDBA::InvalidQueryError, e.message
+    rescue ::Sequel::DatabaseConnectionError => e
+      raise(::ZDBA::DatabaseConnectionError, e.message)
+    rescue ::Sequel::DatabaseError => e
+      raise(::ZDBA::InvalidQueryError, e.message)
     end
   end
 end

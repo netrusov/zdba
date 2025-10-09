@@ -19,15 +19,15 @@ require_relative 'zdba/worker'
 module ZDBA
   module_function
 
-  DatabaseConnectionError = Class.new(StandardError)
-  InvalidQueryError = Class.new(StandardError)
+  DatabaseConnectionError = ::Class.new(::StandardError)
+  InvalidQueryError = ::Class.new(::StandardError)
 
   def root
-    @root ||= Pathname.new(__dir__).join('..')
+    @root ||= ::Pathname.new(__dir__).join('..')
   end
 
   def logger
-    @logger ||= Logger.new($stdout)
+    @logger ||= ::Logger.new($stdout)
   end
 
   def current_time

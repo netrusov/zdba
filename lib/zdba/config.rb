@@ -2,13 +2,13 @@
 
 module ZDBA
   class Config
-    extend Forwardable
+    extend(::Forwardable)
 
     def_delegators :@store, :[], :[]=, :fetch, :key?, :dig
 
     def initialize(config_file)
-      @config_file = Pathname.new(config_file).realpath
-      @schema = JSON.parse(ZDBA.root.join('schemas/config.json').read)
+      @config_file = ::Pathname.new(config_file).realpath
+      @schema = ::JSON.parse(::ZDBA.root.join('schemas/config.json').read)
       @store = {
         logger: {
           level: 'info'
@@ -46,7 +46,9 @@ module ZDBA
         db[:include]&.each do |path|
           file_path = config_file.dirname.join(path)
           file_items = load_yaml_file(file_path)
+
           validate_schema!(@schema, file_items, fragment: '#/$defs/items')
+
           db[:items].concat(file_items)
         end
       end
@@ -69,19 +71,19 @@ module ZDBA
     end
 
     def validate_schema!(schema, data, **)
-      JSON::Validator.validate!(schema, data, **)
+      ::JSON::Validator.validate!(schema, data, **)
     end
 
     def load_yaml_file(file)
-      YAML.safe_load_file(file, symbolize_names: true, aliases: true)
+      ::YAML.safe_load_file(file, symbolize_names: true, aliases: true)
     end
 
     def deep_merge!(left, right)
       left.merge!(right) do |_key, old_value, new_value|
         case old_value
-        when Hash
+        when ::Hash
           deep_merge!(old_value, new_value)
-        when Array
+        when ::Array
           old_value + new_value
         else
           new_value

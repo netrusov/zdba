@@ -3,12 +3,12 @@
 
 require_relative '../lib/zdba'
 
-config = ZDBA::Config.new(ARGV[0])
+config = ::ZDBA::Config.new(::ARGV[0])
 
-ZDBA.logger.level = config[:logger][:level]
+::ZDBA.logger.level = config[:logger][:level]
 
 if config[:logger][:json]
-  ZDBA.logger.formatter = proc do |severity, timestamp, _progname, message|
+  ::ZDBA.logger.formatter = proc do |severity, timestamp, _progname, message|
     caller = caller(4..4)[0]
     data = {
       severity:,
@@ -17,7 +17,7 @@ if config[:logger][:json]
       message:
     }
 
-    JSON.dump(data).concat("\n")
+    ::JSON.dump(data).concat("\n")
   end
 end
 
@@ -25,4 +25,4 @@ config[:require]&.each do |path|
   require path
 end
 
-ZDBA::Manager.new(config).run
+::ZDBA::Manager.new(config).run
