@@ -51,14 +51,17 @@ module ZDBA
           sock.write(message)
 
           response_header = sock.read(13)
+
           unless response_header&.start_with?(::ZDBA::Sender::ZABBIX_HEADER)
             raise("Invalid response header: #{response_header.inspect}")
           end
 
-          response_length = response_header.byteslice(5, 8).unpack1('Q<')
-          response_body = sock.read(response_length)
+          @logger.debug do
+            response_length = response_header.byteslice(5, 8).unpack1('Q<')
+            response_body = sock.read(response_length)
 
-          @logger.debug { "response #{response_body}" }
+            "response #{response_body}"
+          end
         end
       rescue ::StandardError => e
         @logger.error { "failed to send data: #{e.message}" }
