@@ -6,8 +6,8 @@ module ZDBA
 
     def_delegators :@store, :[], :[]=, :fetch, :key?, :dig
 
-    def initialize(config_file)
-      @config_file = ::Pathname.new(config_file).realpath
+    def initialize(config_path)
+      @config_file = ::Pathname.new(config_path).realpath
       @schema = ::JSON.parse(::ZDBA.root.join('schemas/config.json').read)
       @store = {
         logger: {
@@ -44,12 +44,13 @@ module ZDBA
         db[:items] ||= []
 
         db[:include]&.each do |path|
-          file_path = config_file.dirname.join(path)
-          file_items = load_yaml_file(file_path)
+          path = ::Pathname.new(path)
+          path = config_file.dirname.join(path) unless path.absolute?
+          items = load_yaml_file(path)
 
-          validate_schema!(@schema, file_items, fragment: '#/$defs/items')
+          validate_schema!(@schema, items, fragment: '#/$defs/items')
 
-          db[:items].concat(file_items)
+          db[:items].concat(items)
         end
       end
 
