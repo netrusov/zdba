@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/config.json#/$defs/items
+# yaml-language-server: $schema=../../../schemas/config.json#/$defs/items
 - name: uptime
   query: |
     SELECT date_part('epoch', now() - pg_postmaster_start_time())
