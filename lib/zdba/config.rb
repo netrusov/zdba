@@ -63,10 +63,6 @@ module ZDBA
 
         db[:items]&.each do |item|
           item[:poll_interval] ||= db[:poll_interval]
-
-          item[:items]&.each do |rule_item|
-            rule_item[:poll_interval] ||= item[:poll_interval]
-          end
         end
       end
     end
