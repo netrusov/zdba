@@ -57,7 +57,9 @@ module ZDBA
       (worker_threads + sender_threads).each do |thread|
         next if thread.join(::ZDBA::Manager::JOIN_TIMEOUT)
 
-        @logger.warn { "thread '#{thread.name}' did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s" }
+        @logger.warn { "thread '#{thread.name}' did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s, executing force shutdown" }
+
+        thread.exit
       end
 
       @logger.info { 'exiting' }
