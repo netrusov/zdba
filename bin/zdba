@@ -6,20 +6,7 @@ require_relative '../lib/zdba'
 config = ::ZDBA::Config.new(::ARGV[0])
 
 ::ZDBA.logger.level = config[:logger][:level]
-
-if config[:logger][:json]
-  ::ZDBA.logger.formatter = proc do |severity, timestamp, _progname, message|
-    caller = caller(4..4)[0]
-    data = {
-      severity:,
-      timestamp:,
-      caller:,
-      message:
-    }
-
-    ::JSON.dump(data).concat("\n")
-  end
-end
+::ZDBA.logger.formatter = ::ZDBA::LogFormatters::JSON.new if config[:logger][:json]
 
 config[:require]&.each do |path|
   require path

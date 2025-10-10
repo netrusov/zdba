@@ -7,7 +7,7 @@ module ZDBA
     def initialize(config)
       @config = config
 
-      @logger = ::ZDBA.logger
+      @logger = ::ZDBA.logger.with_context(instance: 'manager')
     end
 
     def run
@@ -22,7 +22,7 @@ module ZDBA
 
       worker_threads = @config[:databases].map do |config|
         ::Thread.new do
-          name = "worker-#{config[:name]}"
+          name = "worker<#{config[:name]}>"
 
           ::Thread.current.name = name
 
@@ -37,7 +37,7 @@ module ZDBA
 
       sender_threads = ::Array.new(@config[:sender][:threads]) do |i|
         ::Thread.new do
-          name = "sender-#{i}"
+          name = "sender<#{i}>"
 
           ::Thread.current.name = name
 
@@ -52,13 +52,15 @@ module ZDBA
 
       sleep(1) while running
 
-      @logger.info { 'stopping' }
+      @logger.info { 'stopping threads' }
 
       (worker_threads + sender_threads).each do |thread|
         next if thread.join(::ZDBA::Manager::JOIN_TIMEOUT)
 
         @logger.warn { "thread '#{thread.name}' did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s" }
       end
+
+      @logger.info { 'exiting' }
     end
   end
 end

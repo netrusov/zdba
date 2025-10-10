@@ -8,6 +8,9 @@ AllCops:
 Lint/ConstantResolution:
   Enabled: true
 
+Naming/AccessorMethodName:
+  Enabled: false
+
 Metrics:
   Enabled: false
 

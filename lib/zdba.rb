@@ -11,6 +11,10 @@ require 'sequel'
 
 require_relative 'zdba/config'
 require_relative 'zdba/connection'
+require_relative 'zdba/log_formatters/base'
+require_relative 'zdba/log_formatters/json'
+require_relative 'zdba/log_formatters/plain'
+require_relative 'zdba/logger'
 require_relative 'zdba/manager'
 require_relative 'zdba/sender'
 require_relative 'zdba/version'
@@ -27,7 +31,9 @@ module ZDBA
   end
 
   def logger
-    @logger ||= ::Logger.new($stdout)
+    @logger ||= ::ZDBA::Logger.new($stdout).tap do
+      it.formatter = ::ZDBA::LogFormatters::Plain.new
+    end
   end
 
   def current_time

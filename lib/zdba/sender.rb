@@ -11,7 +11,7 @@ module ZDBA
       @running_checker = running_checker
 
       @zabbix_uri = ::URI.parse(@config[:url])
-      @logger = ::ZDBA.logger
+      @logger = ::ZDBA.logger.with_context(instance: @name)
     end
 
     def run
@@ -36,7 +36,7 @@ module ZDBA
         sleep(1)
       end
 
-      @logger.info { 'shutdown' }
+      @logger.info { 'exiting' }
     end
 
     private
@@ -64,7 +64,7 @@ module ZDBA
           end
         end
       rescue ::StandardError => e
-        @logger.error { "failed to send data: #{e.message}" }
+        @logger.error { ['failed to send data to Zabbix', { exception: e }] }
       end
     end
 
