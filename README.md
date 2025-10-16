@@ -22,14 +22,9 @@ first-class support for JDBC-compatible databases.
 
 1. Install [mise](https://github.com/jdx/mise)
 
-1. Install tools
+1. Setup project
     ```bash
-    mise install
-    ```
-
-1. Install gems
-    ```bash
-    bundle install
+    mise run setup
     ```
 
 ## License

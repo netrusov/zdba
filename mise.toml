@@ -1,3 +1,10 @@
 [tools]
 java = { version = "openjdk-25" }
 ruby = { version = "jruby-10.0.2.0" }
+
+[tasks.setup]
+description = "Setup project"
+run = [
+  "mise install",
+  "bundle install",
+]
