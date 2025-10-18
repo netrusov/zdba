@@ -4,6 +4,8 @@
 Zabbix. It is designed for simplicity, portability, and performance, with
 first-class support for JDBC-compatible databases.
 
+**NOTE:** this repo is work in progress.
+
 ## Features
 
 - YAML-based configuration with JSON Schema validation
