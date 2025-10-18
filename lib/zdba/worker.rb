@@ -5,15 +5,14 @@ module ZDBA
     DISCOVERY_RULE_KEY_FORMAT = '{#%s}'
     DISCOVERY_ITEM_KEY_FORMAT = '%s[%s]'
 
-    def initialize(name:, config:, queue:, running_checker:)
-      @name = name
+    def initialize(config:, queue:, running_checker:, logger: ::ZDBA.logger)
       @config = config
       @queue = queue
       @running_checker = running_checker
+      @logger = logger
 
       @last_polls = {}
       @connection = ::ZDBA::Connection.new(@config[:connection])
-      @logger = ::ZDBA.logger.with_context(instance: @name)
     end
 
     def run
@@ -104,7 +103,7 @@ module ZDBA
     def publish(key, value)
       value = ::JSON.dump(value) unless value.is_a?(::String)
 
-      @queue.push({ host: @name, key:, value:, clock: ::ZDBA.current_time })
+      @queue.push({ host: @config[:name], key:, value:, clock: ::ZDBA.current_time })
     end
   end
 end

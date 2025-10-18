@@ -4,14 +4,13 @@ module ZDBA
   class Sender
     ZABBIX_HEADER = "ZBXD\x01"
 
-    def initialize(name:, config:, queue:, running_checker:)
-      @name = name
+    def initialize(config:, queue:, running_checker:, logger: ::ZDBA.logger)
       @config = config
       @queue = queue
       @running_checker = running_checker
+      @logger = logger
 
       @zabbix_uri = ::URI.parse(@config[:url])
-      @logger = ::ZDBA.logger.with_context(instance: @name)
     end
 
     def run
@@ -60,7 +59,7 @@ module ZDBA
             response_length = response_header.byteslice(5, 8).unpack1('Q<')
             response_body = sock.read(response_length)
 
-            "response #{response_body}"
+            "response: #{response_body}"
           end
         end
       rescue ::StandardError => e

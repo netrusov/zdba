@@ -7,7 +7,7 @@ module ZDBA
     def initialize(config)
       @config = config
 
-      @logger = ::ZDBA.logger.with_context(instance: 'manager')
+      @logger = ::ZDBA.logger.with_context(service: 'manager')
     end
 
     def run
@@ -22,30 +22,26 @@ module ZDBA
 
       worker_threads = @config[:databases].map do |config|
         ::Thread.new do
-          name = "worker<#{config[:name]}>"
-
-          ::Thread.current.name = name
+          ::Thread.current.name = "worker<#{config[:name]}>"
 
           ::ZDBA::Worker.new(
-            name:,
             config:,
             queue:,
-            running_checker:
+            running_checker:,
+            logger: @logger.with_context(service: 'worker', instance: config[:name])
           ).run
         end
       end
 
       sender_threads = ::Array.new(@config[:sender][:threads]) do |i|
         ::Thread.new do
-          name = "sender<#{i}>"
-
-          ::Thread.current.name = name
+          ::Thread.current.name = "sender<#{i}>"
 
           ::ZDBA::Sender.new(
-            name:,
             config: @config[:sender],
             queue:,
-            running_checker:
+            running_checker:,
+            logger: @logger.with_context(service: 'sender', instance: i.to_s)
           ).run
         end
       end
@@ -57,7 +53,7 @@ module ZDBA
       (worker_threads + sender_threads).each do |thread|
         next if thread.join(::ZDBA::Manager::JOIN_TIMEOUT)
 
-        @logger.warn { "thread '#{thread.name}' did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s, executing force shutdown" }
+        @logger.warn { "thread `#{thread.name}` did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s, executing force shutdown" }
 
         thread.exit
       end
