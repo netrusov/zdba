@@ -55,6 +55,21 @@
         },
         "threads": {
           "$ref": "#/$defs/positive_integer"
+        },
+        "retry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "count": {
+              "$ref": "#/$defs/positive_integer"
+            },
+            "delay": {
+              "$ref": "#/$defs/positive_integer"
+            },
+            "max_delay": {
+              "$ref": "#/$defs/positive_integer"
+            }
+          }
         }
       }
     },

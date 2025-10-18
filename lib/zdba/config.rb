@@ -17,6 +17,11 @@ module ZDBA
           connect_timeout: 10,
           batch_size: 100,
           threads: 1,
+          retry: {
+            count: 5,
+            delay: 1.0,
+            max_delay: 30.0,
+          },
         },
         global: {
           poll_interval: 30,

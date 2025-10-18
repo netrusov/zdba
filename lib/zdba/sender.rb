@@ -28,8 +28,9 @@ module ZDBA
         end
 
         unless data.empty?
-          @logger.debug { data.inspect }
-          send_data(data)
+          @logger.debug { "sending data to Zabbix: #{data.inspect}" }
+
+          send_data_with_retry(data)
         end
 
         sleep(1)
@@ -40,54 +41,55 @@ module ZDBA
 
     private
 
-    def send_data(data)
-      payload = ::JSON.dump({ request: 'sender data', data: })
-      header = ::ZDBA::Sender::ZABBIX_HEADER + [payload.bytesize].pack('Q<')
-      message = header + payload
-
-      begin
-        ::Socket.tcp(@zabbix_uri.host, @zabbix_uri.port, connect_timeout: @config[:connect_timeout]) do |sock|
-          sock.write(message)
-
-          response_header = sock.read(13)
-
-          unless response_header&.start_with?(::ZDBA::Sender::ZABBIX_HEADER)
-            raise("Invalid response header: #{response_header.inspect}")
-          end
-
-          @logger.debug do
-            response_length = response_header.byteslice(5, 8).unpack1('Q<')
-            response_body = sock.read(response_length)
-
-            "response: #{response_body}"
-          end
-        end
-      rescue ::StandardError => e
-        @logger.error { ['failed to send data to Zabbix', { exception: e }] }
-      end
-    end
-
     def send_data_with_retry(data)
-      max_retries = @config.fetch(:max_retries, 5)
-      base_delay = @config.fetch(:retry_delay, 1.0)
-      max_delay = @config.fetch(:max_retry_delay, 30.0)
+      message = prepare_message(data)
+
+      retry_count = @config.dig(:retry, :count)
+      retry_delay = @config.dig(:retry, :delay)
+      retry_max_delay = @config.dig(:retry, :max_delay)
 
       attempts = 0
 
       begin
-        send_data(data)
+        send_message(message)
         true
       rescue ::StandardError => e
         attempts += 1
 
-        if attempts > max_retries
-          @logger.error { "giving up after #{attempts} attempts: #{e.message}" }
+        if attempts >= retry_count
+          @logger.error { ["failed to send data to Zabbix, giving up after #{attempts} attempts", { exception: e }] }
           false
         else
-          delay = [base_delay * (2**(attempts - 1)), max_delay].min
-          @logger.warn { "retrying in #{delay}s (attempt #{attempts}) - #{e.message}" }
+          delay = [retry_delay * (2**(attempts - 1)), retry_max_delay].min
+          @logger.warn { ["retrying in #{delay}s (attempt #{attempts})", { exception: e }] }
           sleep(delay)
           retry
+        end
+      end
+    end
+
+    def prepare_message(data)
+      payload = ::JSON.dump({ request: 'sender data', data: })
+      header = ::ZDBA::Sender::ZABBIX_HEADER + [payload.bytesize].pack('Q<')
+
+      header + payload
+    end
+
+    def send_message(message)
+      ::Socket.tcp(@zabbix_uri.host, @zabbix_uri.port, connect_timeout: @config[:connect_timeout]) do |sock|
+        sock.write(message)
+
+        response_header = sock.read(13)
+
+        unless response_header&.start_with?(::ZDBA::Sender::ZABBIX_HEADER)
+          raise("invalid response header: #{response_header.inspect}")
+        end
+
+        @logger.debug do
+          response_length = response_header.byteslice(5, 8).unpack1('Q<')
+          response_body = sock.read(response_length)
+
+          "message sent successfully: #{response_body}"
         end
       end
     end
