@@ -101,7 +101,13 @@ module ZDBA
     end
 
     def publish(key, value)
-      value = ::JSON.dump(value) unless value.is_a?(::String)
+      value =
+        case value
+        when ::Integer, ::String, ::Float
+          value
+        else
+          ::JSON.dump(value)
+        end
 
       @queue.push({ host: @config[:name], key:, value:, clock: ::ZDBA.current_time.to_i })
     end
