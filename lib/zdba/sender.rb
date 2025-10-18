@@ -29,7 +29,7 @@ module ZDBA
 
         unless data.empty?
           @logger.debug { data.inspect }
-          # send_data(data)
+          send_data(data)
         end
 
         sleep(1)
