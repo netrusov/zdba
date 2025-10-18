@@ -19,7 +19,7 @@ require_relative 'lib/zdba/version'
     'bug_tracker_uri' => 'https://github.com/netrusov/zdba/issues',
     'changelog_uri' => "https://github.com/netrusov/zdba/releases/tag/v#{spec.version}",
     'source_code_uri' => "https://github.com/netrusov/zdba/tree/v#{spec.version}",
-    'rubygems_mfa_required' => 'true'
+    'rubygems_mfa_required' => 'true',
   }
 
   spec.files = ::Dir['lib/**/*', 'schemas/**/*', 'examples/**/*', 'LICENSE']

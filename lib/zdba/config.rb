@@ -11,16 +11,16 @@ module ZDBA
       @schema = ::JSON.parse(::ZDBA.root.join('schemas/config.json').read)
       @store = {
         logger: {
-          level: 'info'
+          level: 'info',
         },
         sender: {
           connect_timeout: 10,
           batch_size: 100,
-          threads: 1
+          threads: 1,
         },
         global: {
-          poll_interval: 30
-        }
+          poll_interval: 30,
+        },
       }
 
       prepare_config

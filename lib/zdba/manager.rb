@@ -28,7 +28,7 @@ module ZDBA
             config:,
             queue:,
             running_checker:,
-            logger: @logger.with_context(service: 'worker', instance: config[:name])
+            logger: @logger.with_context(service: 'worker', instance: config[:name]),
           ).run
         end
       end
@@ -41,7 +41,7 @@ module ZDBA
             config: @config[:sender],
             queue:,
             running_checker:,
-            logger: @logger.with_context(service: 'sender', instance: i.to_s)
+            logger: @logger.with_context(service: 'sender', instance: i.to_s),
           ).run
         end
       end
@@ -53,7 +53,9 @@ module ZDBA
       (worker_threads + sender_threads).each do |thread|
         next if thread.join(::ZDBA::Manager::JOIN_TIMEOUT)
 
-        @logger.warn { "thread `#{thread.name}` did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s, executing force shutdown" }
+        @logger.warn do
+          "thread `#{thread.name}` did not stop within #{::ZDBA::Manager::JOIN_TIMEOUT}s, executing force shutdown"
+        end
 
         thread.exit
       end

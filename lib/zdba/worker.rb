@@ -109,7 +109,12 @@ module ZDBA
           ::JSON.dump(value)
         end
 
-      @queue.push({ host: @config[:name], key:, value:, clock: ::ZDBA.current_time.to_i })
+      @queue.push({
+        host: @config[:name],
+        key:,
+        value:,
+        clock: ::ZDBA.current_time.to_i,
+      })
     end
   end
 end

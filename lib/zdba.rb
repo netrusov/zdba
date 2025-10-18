@@ -31,8 +31,8 @@ module ZDBA
   end
 
   def logger
-    @logger ||= ::ZDBA::Logger.new($stdout).tap do
-      it.formatter = ::ZDBA::LogFormatters::Plain.new
+    @logger ||= ::ZDBA::Logger.new($stdout).tap do |l|
+      l.formatter = ::ZDBA::LogFormatters::Plain.new
     end
   end
 

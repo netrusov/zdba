@@ -10,14 +10,14 @@ module ZDBA
           severity:,
           timestamp:,
           # caller: caller(4..4)[0],
-          message: msg2str(message)
+          message: msg2str(message),
         }
 
         if (e = context&.delete(:exception))
           data[:exception] = {
             class: e.class,
             message: e.message,
-            backtrace: e.backtrace
+            backtrace: e.backtrace,
           }
         end
 

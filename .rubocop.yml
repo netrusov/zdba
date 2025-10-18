@@ -5,14 +5,20 @@ AllCops:
   Exclude:
     - "tmp/**/*"
 
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
 Lint/ConstantResolution:
   Enabled: true
+
+Metrics:
+  Enabled: false
 
 Naming/AccessorMethodName:
   Enabled: false
 
-Metrics:
-  Enabled: false
+Naming/MethodParameterName:
+  AllowedNames: [_, e]
 
 Style/ClassAndModuleChildren:
   Enabled: true
@@ -23,3 +29,12 @@ Style/Documentation:
 
 Style/MethodCallWithArgsParentheses:
   Enabled: true
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: diff_comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: diff_comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: diff_comma
