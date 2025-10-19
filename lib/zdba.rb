@@ -4,6 +4,7 @@ require 'forwardable'
 require 'json'
 require 'logger'
 require 'pathname'
+require 'securerandom'
 require 'yaml'
 
 require 'json-schema'

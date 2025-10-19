@@ -91,9 +91,7 @@ module ZDBA
     end
 
     def throttle(name:, poll_interval:, **)
-      last_poll = @last_polls[name]
-
-      return if last_poll && (poll_interval > ::ZDBA.current_time - last_poll)
+      return if (last_poll = @last_polls[name]) && (poll_interval > ::ZDBA.current_time - last_poll)
 
       @last_polls[name] = ::ZDBA.current_time
 

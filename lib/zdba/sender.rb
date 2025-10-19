@@ -17,7 +17,7 @@ module ZDBA
       @logger.info { 'starting' }
 
       while @running_checker.call || !@queue.empty?
-        @logger.info { "(stopping): queue still contains #{@queue.size} message(s)" } unless @running_checker.call
+        @logger.info { "(stopping): queue still contains #{@queue.size} item(s)" } unless @running_checker.call
 
         data = []
 
@@ -28,9 +28,9 @@ module ZDBA
         end
 
         unless data.empty?
-          @logger.debug { "sending data to Zabbix: #{data.inspect}" }
-
-          send_data_with_retry(data)
+          @logger.with_context(batch_id: ::SecureRandom.uuid) do
+            send_data_with_retry(data)
+          end
         end
 
         sleep(1)
@@ -47,21 +47,29 @@ module ZDBA
       retry_count = @config.dig(:retry, :count)
       retry_delay = @config.dig(:retry, :delay)
       retry_max_delay = @config.dig(:retry, :max_delay)
+      retry_attempts = 0
 
-      attempts = 0
+      @logger.debug { "sending #{data.size} item(s) to Zabbix: #{data.inspect}" }
 
       begin
         send_message(message)
+
+        @logger.info { 'connection to Zabbix re-established' } if retry_attempts.positive?
+
         true
       rescue ::StandardError => e
-        attempts += 1
+        @logger.error { ['failed to send data to Zabbix', { exception: e }] }
 
-        if attempts >= retry_count
-          @logger.error { ["failed to send data to Zabbix, giving up after #{attempts} attempts", { exception: e }] }
+        if retry_attempts >= retry_count
+          @logger.error { "giving up after #{retry_attempts} attempts" }
+
           false
         else
-          delay = [retry_delay * (2**(attempts - 1)), retry_max_delay].min
-          @logger.warn { ["retrying in #{delay}s (attempt #{attempts})", { exception: e }] }
+          retry_attempts += 1
+          delay = [retry_delay * (2**(retry_attempts - 1)), retry_max_delay].min
+
+          @logger.warn { "retrying in #{delay}s (attempt #{retry_attempts}/#{retry_count})" }
+
           sleep(delay)
           retry
         end
@@ -89,7 +97,7 @@ module ZDBA
           response_length = response_header.byteslice(5, 8).unpack1('Q<')
           response_body = sock.read(response_length)
 
-          "message sent successfully: #{response_body}"
+          "data sent successfully: #{response_body}"
         end
       end
     end
