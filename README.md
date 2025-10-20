@@ -6,23 +6,15 @@ first-class support for JDBC-compatible databases.
 
 **NOTE:** this repo is work in progress.
 
-## Features
-
-- YAML-based configuration with JSON Schema validation
-- Pushes metrics to Zabbix over HTTP(S)
-- Multithreaded workers and sender architecture using queues
-- Supports shared and externalized item definitions
-- Structured JSON logging
-
 ## Contributing
+
+1. Install [mise](https://github.com/jdx/mise)
 
 1. Clone the repository
     ```bash
     git clone https://github.com/netrusov/zdba.git
     cd zdba
     ```
-
-1. Install [mise](https://github.com/jdx/mise)
 
 1. Setup project
     ```bash
