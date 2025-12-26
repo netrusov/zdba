@@ -4,6 +4,7 @@ PATH
     zdba (0.0.1)
       json-schema (>= 5.1.1)
       sequel (>= 5.91.0)
+      thor (>= 1.4.0)
 
 GEM
   remote: https://rubygems.org/
@@ -57,6 +58,7 @@ GEM
       bigdecimal
     spoon (0.0.6)
       ffi
+    thor (1.4.0)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.1.0)
@@ -66,7 +68,7 @@ PLATFORMS
   universal-java-25
 
 DEPENDENCIES
-  pry (~> 0.15.2)
+  pry
   rubocop
   rubocop-performance
   zdba!

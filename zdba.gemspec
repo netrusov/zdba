@@ -22,11 +22,12 @@ require_relative 'lib/zdba/version'
     'rubygems_mfa_required' => 'true',
   }
 
-  spec.files = ::Dir['lib/**/*', 'schemas/**/*', 'examples/**/*', 'LICENSE']
+  spec.files = ::Dir['lib/**/*', 'schemas/**/*', 'templates/**/*', 'LICENSE']
   spec.bindir = 'bin'
   spec.executables = ['zdba']
   spec.require_paths = ['lib']
 
   spec.add_dependency('json-schema', '>= 5.1.1')
   spec.add_dependency('sequel', '>= 5.91.0')
+  spec.add_dependency('thor', '>= 1.4.0')
 end

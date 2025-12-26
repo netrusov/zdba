@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=../../../schemas/config.json#/$defs/items
 - name: archivelog_switch
   query: |
     select count(*)

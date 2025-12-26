@@ -4,9 +4,9 @@
 !*/
 
 !/bin/**
-!/examples/**
 !/lib/**
 !/schemas/**
+!/templates/**
 
 !/.gitignore
 !/.rubocop.yml

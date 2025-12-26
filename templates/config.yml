@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=../schemas/config.json
 logger:
   level: info
 
