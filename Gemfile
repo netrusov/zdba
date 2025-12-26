@@ -4,6 +4,10 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'pry'
-gem 'rubocop'
-gem 'rubocop-performance'
+gem 'warbler'
+
+group :development do
+  gem 'pry'
+  gem 'rubocop'
+  gem 'rubocop-performance'
+end

@@ -4,6 +4,7 @@
 !*/
 
 !/bin/**
+!/config/**
 !/lib/**
 !/schemas/**
 !/templates/**
