@@ -32,18 +32,7 @@ module ZDBA
     private
 
     def collect_metrics
-      @config[:items]&.each do |item|
-        case item[:type]
-        when 'discovery_rule'
-          process_discovery_rule(item)
-        when 'discovery_item'
-          process_discovery_item(item)
-        else
-          process_basic_item(item)
-        end
-      rescue ::ZDBA::InvalidQueryError => e
-        @logger.error { ["failed to execute query `#{item[:name]}`", { exception: e }] }
-      end
+      @config[:items]&.each { process_item(it) }
 
       send_liveness_check(1)
     rescue ::ZDBA::DatabaseConnectionError => e
@@ -60,37 +49,46 @@ module ZDBA
       end
     end
 
-    def process_basic_item(item)
-      throttle(**item) do
-        value = @connection.fetch_one(item[:query])&.dig(0)
-        value = item[:default] if value.nil?
-
-        publish(item[:name], value)
+    def process_item(item)
+      throttle(item[:name], item[:poll_interval]) do
+        case item[:type]
+        when 'discovery_rule'
+          process_discovery_rule(item)
+        when 'discovery_item'
+          process_discovery_item(item)
+        else
+          process_basic_item(item)
+        end
+      rescue ::ZDBA::InvalidQueryError => e
+        @logger.error { ["failed to execute query `#{item[:name]}`", { exception: e }] }
       end
+    end
+
+    def process_basic_item(item)
+      value = @connection.fetch_one(item[:query])&.dig(0)
+      value = item[:default] if value.nil?
+
+      publish(item[:name], value)
     end
 
     def process_discovery_rule(item)
-      throttle(**item) do
-        key = format(::ZDBA::Worker::DISCOVERY_RULE_KEY_FORMAT, item[:name]).upcase
-        discovered = @connection.fetch_many(item[:query]).map do |(value)|
-          { key => value }
-        end
-
-        publish(item[:name], { data: discovered })
+      key = format(::ZDBA::Worker::DISCOVERY_RULE_KEY_FORMAT, item[:name]).upcase
+      discovered = @connection.fetch_many(item[:query]).map do |(value)|
+        { key => value }
       end
+
+      publish(item[:name], { data: discovered })
     end
 
     def process_discovery_item(item)
-      throttle(**item) do
-        @connection.fetch_many(item[:query]) do |(key, value)|
-          key = format(::ZDBA::Worker::DISCOVERY_ITEM_KEY_FORMAT, item[:name], key)
+      @connection.fetch_many(item[:query]) do |(key, value)|
+        key = format(::ZDBA::Worker::DISCOVERY_ITEM_KEY_FORMAT, item[:name], key)
 
-          publish(key, value)
-        end
+        publish(key, value)
       end
     end
 
-    def throttle(name:, poll_interval:, **)
+    def throttle(name, poll_interval)
       return if (last_poll = @last_polls[name]) && (poll_interval > ::ZDBA.current_time - last_poll)
 
       @last_polls[name] = ::ZDBA.current_time

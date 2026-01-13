@@ -12,9 +12,7 @@ module ZDBA
       ::ZDBA.logger.level = config[:logger][:level]
       ::ZDBA.logger.formatter = ::ZDBA::LogFormatters::JSON.new if config[:logger][:json]
 
-      config[:require]&.each do |path|
-        require(path)
-      end
+      config[:require]&.each { require(it) }
 
       ::ZDBA::Manager.new(config).run
     end
@@ -27,8 +25,7 @@ module ZDBA
       src = ::ZDBA.root.join('templates')
       out = ::Pathname.new(out).expand_path.tap(&:mkpath)
 
-      config_out = out.join('config.yml')
-      ::FileUtils.cp(src.join('config.yml'), config_out) unless config_out.exist?
+      copy_file(src.join('config.yml'), out.join('config.yml'))
 
       return if (adapters = options[:adapters]).empty?
 
@@ -43,10 +40,20 @@ module ZDBA
         items_out = out.join('items', adapter).tap(&:mkpath)
 
         items_src.each_child do |child|
-          next if items_out.join(child.basename).exist?
+          next unless child.file?
 
-          ::FileUtils.cp(child, items_out)
+          copy_file(child, items_out.join(child.basename))
         end
+      end
+    end
+
+    private
+
+    def copy_file(src, out)
+      if out.exist?
+        say("file '#{out}' already exists, skipping")
+      else
+        ::FileUtils.cp(src, out)
       end
     end
   end
