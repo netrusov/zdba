@@ -6,29 +6,81 @@ first-class support for JDBC-compatible databases.
 
 **NOTE:** this repo is work in progress.
 
-## Install
+## Installation
+
+Using GitHub releases:
+
+```bash
+# using wget
+wget "https://github.com/netrusov/zdba/releases/latest/download/zdba.jar"
+
+# or using curl
+curl -L "https://github.com/netrusov/zdba/releases/latest/download/zdba.jar" -o zdba.jar
+```
 
 Using Docker:
+
 ```bash
 function zdba() {
     docker run --rm -it --user "$(id -u):$(id -g)" -v "$PWD:/work" ghcr.io/netrusov/zdba "$@"
 }
 ```
 
+## Usage
+
+Basic setup:
+
+```bash
+java -jar zdba.jar init .
+java -jar zdba.jar start -c config.yml
+```
+
+Using the Docker wrapper:
+
+```bash
+zdba init .
+zdba start -c config.yml
+```
+
+For more commands and options:
+
+```bash
+java -jar zdba.jar help
+```
+
+Custom queries: Add your own items under `databases[].items` in `config.yml`.
+
+```yaml
+databases:
+  - name: mydb
+    connection:
+      database: "postgresql://..."
+      username: "..."
+      password: "..."
+    items:
+      - name: my_metric
+        query: |
+          SELECT count(*) FROM my_table
+```
+
+Basic items should return a single value. For additional item types and
+examples, refer to the templates under `templates/`.
+
 ## Contributing
 
 1. Install [mise](https://github.com/jdx/mise)
 
 1. Clone the repository
-    ```bash
-    git clone https://github.com/netrusov/zdba.git
-    cd zdba
-    ```
+
+   ```bash
+   git clone https://github.com/netrusov/zdba.git
+   cd zdba
+   ```
 
 1. Setup project
-    ```bash
-    mise run setup
-    ```
+   ```bash
+   mise run setup
+   ```
 
 ## License
 
