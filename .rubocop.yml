@@ -2,8 +2,12 @@ AllCops:
   TargetRubyVersion: 3.4
   SuggestExtensions: false
   NewCops: enable
-  Exclude:
-    - "tmp/**/*"
+  Include:
+    - "bin/**/*"
+    - "config/**/*"
+    - "lib/**/*"
+    - "Gemfile"
+    - "*.gemspec"
 
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent

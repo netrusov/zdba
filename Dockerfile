@@ -16,6 +16,6 @@ FROM gcr.io/distroless/java25-debian13
 
 WORKDIR /work
 
-COPY --from=build /app/zdba.jar /app/zdba.jar
+COPY --from=build /app/zdba.jar /zdba.jar
 
-ENTRYPOINT ["java", "--enable-native-access=ALL-UNNAMED", "--sun-misc-unsafe-memory-access=allow", "-jar", "/app/zdba.jar"]
+ENTRYPOINT ["java", "--enable-native-access=ALL-UNNAMED", "--sun-misc-unsafe-memory-access=allow", "-jar", "/zdba.jar"]

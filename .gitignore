@@ -3,17 +3,20 @@
 # but directories
 !*/
 
-!/.github/**
+!/.github/workflows/**
 !/bin/**
 !/config/**
 !/lib/**
 !/schemas/**
 !/templates/**
 
-!/.dockerignore
 !/.gitignore
 !/.rubocop.yml
+!/.tool-versions
 !/Dockerfile
+!/Dockerfile.dockerignore
+!/Dockerfile.release
+!/Dockerfile.release.dockerignore
 !/Gemfile
 !/Gemfile.lock
 !/LICENSE
