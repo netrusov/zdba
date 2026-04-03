@@ -4,6 +4,14 @@
 Zabbix. It is designed for simplicity, portability, and performance, with
 first-class support for JDBC-compatible databases.
 
+This project is a rewrite of my original
+[ZabbixDBA](https://github.com/netrusov/ZabbixDBA), with a stronger focus on
+making installation, deployment, and configuration simpler.
+
+JRuby was chosen mainly for its access to the broader JVM ecosystem, and JDBC
+in particular. In practice, that means database driver setup is usually just a
+matter of downloading the vendor JAR and referencing it in the config.
+
 **NOTE:** this repo is work in progress.
 
 ## Installation
