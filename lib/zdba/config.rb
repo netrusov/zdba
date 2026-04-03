@@ -7,7 +7,7 @@ module ZDBA
     def_delegators :@store, :[], :[]=, :fetch, :key?, :dig
 
     def initialize(config_path)
-      @config_file = ::Pathname.new(config_path).realpath
+      @config_path = config_path
       @schema = ::JSON.parse(::ZDBA.root.join('schemas/config.json').read)
       @store = {
         logger: {
@@ -34,14 +34,19 @@ module ZDBA
     private
 
     def prepare_config
-      config = load_config_file(@config_file)
+      config = load_config(@config_path)
       apply_defaults(config)
       deep_merge!(@store, config)
     end
 
-    def load_config_file(config_file)
-      config = load_yaml_file(config_file)
+    def load_config(config_path)
+      config = load_yaml_file(config_path)
       validate_schema!(@schema, config)
+
+      config[:require]&.each do |path|
+        path = config_path.dirname.join(path) if path.start_with?('./')
+        require(path)
+      end
 
       config[:databases].each do |db|
         next unless db[:items] || db[:include]
@@ -50,7 +55,7 @@ module ZDBA
 
         db[:include]&.each do |path|
           path = ::Pathname.new(path)
-          path = config_file.dirname.join(path) unless path.absolute?
+          path = config_path.dirname.join(path) unless path.absolute?
           items = load_yaml_file(path)
 
           validate_schema!(@schema, items, fragment: '#/$defs/items')

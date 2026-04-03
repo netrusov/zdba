@@ -7,12 +7,11 @@ module ZDBA
     desc 'start', 'Start the service'
     option :config, aliases: %w[-c], type: :string, required: true, desc: 'Config file path'
     def start(...)
-      config = ::ZDBA::Config.new(options[:config])
+      config_path = ::Pathname.new(options[:config]).realpath
+      config = ::ZDBA::Config.new(config_path)
 
       ::ZDBA.logger.level = config[:logger][:level]
       ::ZDBA.logger.formatter = ::ZDBA::LogFormatters::JSON.new if config[:logger][:json]
-
-      config[:require]&.each { require(it) }
 
       ::ZDBA::Manager.new(config).run
     end
