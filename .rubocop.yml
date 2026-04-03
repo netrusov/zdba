@@ -27,6 +27,9 @@ Style/ClassAndModuleChildren:
 Style/Documentation:
   Enabled: false
 
+Style/EmptyClassDefinition:
+  Enabled: false
+
 Style/MethodCallWithArgsParentheses:
   Enabled: true
 

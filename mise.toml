@@ -1,6 +1,6 @@
 [tools]
 java = { version = "openjdk-25" }
-ruby = { version = "jruby-10.0.2.0" }
+ruby = "jruby-10.0.4.0"
 
 [tasks.setup]
 description = "Setup project"
@@ -8,3 +8,6 @@ run = [
   "mise install",
   "bundle install",
 ]
+
+[env]
+JAVA_OPTS = "--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow"

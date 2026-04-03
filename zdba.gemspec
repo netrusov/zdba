@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-lib = ::File.expand_path('lib', __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-
 require_relative 'lib/zdba/version'
 
 ::Gem::Specification.new do |spec|
@@ -27,7 +24,8 @@ require_relative 'lib/zdba/version'
   spec.executables = ['zdba']
   spec.require_paths = ['lib']
 
-  spec.add_dependency('json-schema', '>= 5.1.1')
-  spec.add_dependency('sequel', '>= 5.91.0')
-  spec.add_dependency('thor', '>= 1.4.0')
+  spec.add_dependency('json-schema', '>= 5.0.0')
+  spec.add_dependency('logger', '>= 1.0.0')
+  spec.add_dependency('sequel', '>= 5.0.0')
+  spec.add_dependency('thor', '>= 1.0.0')
 end
