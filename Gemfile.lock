@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    zdba (0.0.1)
+    zdba (0.0.2)
       json-schema (>= 5.0.0)
       logger (>= 1.0.0)
       sequel (>= 5.0.0)
