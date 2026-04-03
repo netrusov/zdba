@@ -44,7 +44,7 @@ module ZDBA
     end
 
     def send_liveness_check(value)
-      throttle(name: 'alive', poll_interval: 10) do
+      throttle('alive', 10) do
         publish('alive', value)
       end
     end
