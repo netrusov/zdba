@@ -3,14 +3,17 @@
 # but directories
 !*/
 
+!/.github/**
 !/bin/**
 !/config/**
 !/lib/**
 !/schemas/**
 !/templates/**
 
+!/.dockerignore
 !/.gitignore
 !/.rubocop.yml
+!/Dockerfile
 !/Gemfile
 !/Gemfile.lock
 !/LICENSE

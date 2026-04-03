@@ -6,6 +6,15 @@ first-class support for JDBC-compatible databases.
 
 **NOTE:** this repo is work in progress.
 
+## Install
+
+Using Docker:
+```bash
+function zdba() {
+    docker run --rm -it --user "$(id -u):$(id -g)" -v "$PWD:/work" ghcr.io/netrusov/zdba "$@"
+}
+```
+
 ## Contributing
 
 1. Install [mise](https://github.com/jdx/mise)

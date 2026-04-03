@@ -1,0 +1,11 @@
+*
+
+!/bin/
+!/config/
+!/lib/
+!/schemas/
+!/templates/
+!/Gemfile
+!/Gemfile.lock
+!/LICENSE
+!/zdba.gemspec
